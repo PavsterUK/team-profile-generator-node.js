@@ -10,6 +10,20 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./src/page-template.js");
 
+function inquireManager() {
+  return inquirer.prompt(Manager.promptQuestions());
+}
 
-// TODO: Write Code to gather information about the development team members, and render the HTML file.
+function inquireEngineer() {
+  return inquirer.prompt(Engineer.promptQuestions());
+}
 
+function inquireIntern() {
+  return inquirer.prompt(Intern.promptQuestions());
+}
+
+function init() {
+  inquireManager().then((result) => console.log(result));
+}
+
+init();

@@ -21,7 +21,7 @@ function addEmployee(role) {
   return employeeClass.init();
 }
 
-function createTeam() {
+function addNonManagerRoles() {
   let nonManagerRoles = [...Object.keys(employeeTypes)];
   nonManagerRoles.shift(); //Remove Manager from the list.
 
@@ -38,7 +38,7 @@ function createTeam() {
       if (answer.role !== "Exit prompt") {
         addEmployee(answer.role).then((employee) => {
           team.push(employee);
-          createTeam();
+          addNonManagerRoles();
         });
       } else {
         saveHTML(outputPath, render(team));
@@ -65,7 +65,7 @@ function saveHTML(outputPath, html) {
 function init() {
   addEmployee("Manager").then((manager) => {
     team.push(manager);
-    createTeam();
+    addNonManagerRoles();
   });
 }
 

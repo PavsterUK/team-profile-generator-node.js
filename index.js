@@ -3,14 +3,47 @@ const Engineer = require("./lib/Engineer");
 const Intern = require("./lib/Intern");
 const path = require("path");
 const fs = require("fs");
+const render = require("./src/page-template.js");
+const inquirer = require("inquirer");
 
 const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 
-const render = require("./src/page-template.js");
+const employees = [];
+const employeeTypes = {
+  Manager,
+  Engineer,
+  Intern,
+};
 
-function init() {
-  Intern.init().then((output) => console.log(output));
+function addEmployee(role) {
+  const employeeClass = employeeTypes[role];
+
+  employeeClass.init().then((employeeData) => {
+    employees.push(employeeData);
+  });
 }
 
-init();
+function promptUser() {
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "role",
+        message: "What employee would you like to add?",
+        choices: [
+          ...Object.keys(({ Manager, ...rest } = employeeTypes)),
+          "exit",
+        ],
+      },
+    ])
+    .then((answer) => {
+      if (answer.role !== "exit") {
+        addEmployee(answer.role);
+      } else {
+        return;
+      }
+    });
+}
+
+promptUser();

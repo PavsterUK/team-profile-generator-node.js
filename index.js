@@ -8,8 +8,8 @@ const inquirer = require("inquirer");
 
 const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
+const team = [];
 
-const employees = [];
 const employeeTypes = {
   Manager,
   Engineer,
@@ -18,32 +18,55 @@ const employeeTypes = {
 
 function addEmployee(role) {
   const employeeClass = employeeTypes[role];
-
-  employeeClass.init().then((employeeData) => {
-    employees.push(employeeData);
-  });
+  return employeeClass.init();
 }
 
-function promptUser() {
-  inquirer
+function createTeam() {
+  let nonManagerRoles = [...Object.keys(employeeTypes)];
+  nonManagerRoles.shift(); //Remove Manager from the list.
+
+  return inquirer
     .prompt([
       {
         type: "list",
         name: "role",
         message: "What employee would you like to add?",
-        choices: [
-          ...Object.keys(({ Manager, ...rest } = employeeTypes)),
-          "exit",
-        ],
+        choices: [...nonManagerRoles, "Exit prompt"],
       },
     ])
     .then((answer) => {
-      if (answer.role !== "exit") {
-        addEmployee(answer.role);
+      if (answer.role !== "Exit prompt") {
+        addEmployee(answer.role).then((employee) => {
+          team.push(employee);
+          createTeam();
+        });
       } else {
-        return;
+        saveHTML(outputPath, render(team));
       }
     });
 }
 
-promptUser();
+function saveHTML(outputPath, html) {
+  fs.mkdir(OUTPUT_DIR, { recursive: true }, (error) => {
+    if (error) {
+      console.error(`Failed to create directory: ${error}`);
+      return;
+    }
+    fs.writeFile(outputPath, html, (error) => {
+      if (error) {
+        console.error(`Failed to write to file: ${error}`);
+        return;
+      }
+      console.log(`File saved successfully: ${outputPath}`);
+    });
+  });
+}
+
+function init() {
+  addEmployee("Manager").then((manager) => {
+    team.push(manager);
+    createTeam();
+  });
+}
+
+init();
